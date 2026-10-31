@@ -327,6 +327,7 @@ details p{margin:0 0 22px;color:var(--muted);max-width:66ch}
 /* footer */
 footer{margin-top:88px;background:var(--ink);color:#d9d9de;padding-block:30px 40px;font-size:14px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:10px 28px;justify-content:space-between;align-items:center}
+footer .ft-note{flex-basis:100%;color:#a9a9b0;font-size:13px}footer .ft-link{color:var(--white);text-decoration-thickness:1px;text-underline-offset:3px}footer .ft-link:hover{color:var(--canary)}
 footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--display);font-size:17px;color:var(--canary);font-weight:700}[dir="rtl"] footer .tl{font-family:var(--ar-display);font-size:15px}
 
 /* phone bar */
@@ -342,7 +343,7 @@ footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--disp
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="#top" aria-label="AHCA">AHCA<i>.</i></a>
+    <a class="logo" href="#top" aria-label="AHCA" dir="ltr">AHCA<i>.</i></a>
     <nav class="nav" aria-label="Sections">
       <a href="#check" data-i18n="nav_check">Do I need it?</a>
       <a href="#prices" data-i18n="nav_prices">Prices</a>
@@ -633,11 +634,13 @@ footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--disp
 
 <footer>
   <div class="wrap">
-    <a class="logo" href="#top">AHCA<i>.</i></a>
+    <a class="logo" href="#top" dir="ltr">AHCA<i>.</i></a>
     <span class="tl" data-i18n="tagline">Your money, working harder.</span>
     <span data-i18n="ft_1">FTA-registered tax agent</span>
     <span data-i18n="ft_2">TAAN 20000204 · Trade licence 1618350</span>
     <span data-i18n="ft_3">© 2026 AHCA. All rights reserved.</span>
+    <span class="ft-note" data-i18n="ft_4">AHCA is a private firm and is not affiliated with the Federal Tax Authority.</span>
+    <a class="ft-link" href="privacy.html" data-i18n="ft_pp">Privacy policy</a>
   </div>
 </footer>
 
@@ -728,7 +731,7 @@ footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--disp
     a9:"سبع سنوات لضريبة الشركات، وخمس سنوات لضريبة القيمة المضافة، وخمس عشرة سنة لسجلات العقارات، تُحتسب من نهاية الفترة الضريبية. وتحفظ باقات مسك الدفاتر لدينا سجلاتك مرتبة وجاهزة لأي تدقيق من الهيئة.",
     cta_h:"رسالة واحدة تكفي لتعرف السعر.", cta_p:"أخبرنا بما تحتاجه، ونردّ عادةً خلال يوم عمل واحد بالعربية أو الإنجليزية.", cta_btn:"راسلنا عبر واتساب",
     c_wa:"واتساب أو اتصال", c_mail:"البريد الإلكتروني", c_off:"مكاتبنا", c_off_v:"دبي وأبوظبي", copy:"نسخ",
-    tagline:"أموالك تعمل لصالحك.", ft_1:"وكيل ضريبي مسجّل لدى الهيئة الاتحادية للضرائب", ft_2:"رقم الوكيل 20000204 · الرخصة التجارية 1618350", ft_3:"© 2026 AHCA. جميع الحقوق محفوظة.",
+    tagline:"أموالك تعمل لصالحك.", ft_1:"وكيل ضريبي مسجّل لدى الهيئة الاتحادية للضرائب", ft_2:"رقم الوكيل 20000204 · الرخصة التجارية 1618350", ft_3:"© 2026 AHCA. جميع الحقوق محفوظة.", ft_4:"AHCA شركة خاصة لا ترتبط بالهيئة الاتحادية للضرائب.", ft_pp:"سياسة الخصوصية",
     m_wa:"واتساب", m_call:"اتصال"
   };
 
@@ -799,7 +802,14 @@ footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--disp
     var n = fmt(price(key)), per = PER[key] ? " " + L(PER[key]) : "", vat = " " + L(incl ? "vat_in" : "vat_ex");
     return lang === "ar" ? ((from ? "من " : "") + n + " درهم" + per + vat) : ((from ? "from " : "") + "AED " + n + per + vat);
   }
-  function waHref(msg){ return "https://wa.me/" + C.whatsapp + "?text=" + encodeURIComponent(msg); }
+  /* Google Ads: each ad link carries ?ref=CODE. Keep it for the visit and add it to every WhatsApp message, so each chat shows which ad it came from. */
+  var REF = "";
+  try {
+    var mref = /[?&]ref=([A-Za-z0-9-]{1,24})(?:&|$)/.exec(location.search);
+    if (mref) sessionStorage.setItem("ahca-ref", mref[1]);
+    REF = (mref && mref[1]) || sessionStorage.getItem("ahca-ref") || "";
+  } catch (e) {}
+  function waHref(msg){ if (REF) msg += (lang === "ar" ? " (رمز " : " (ref ") + REF + ")"; return "https://wa.me/" + C.whatsapp + "?text=" + encodeURIComponent(msg); }
 
   function applyPrices(){
     document.querySelectorAll("[data-price]").forEach(function(el){ el.textContent = fmt(price(el.getAttribute("data-price"))); });
@@ -914,7 +924,7 @@ footer .logo{color:var(--white);font-size:26px}footer .tl{font-family:var(--disp
   document.addEventListener("click", function(e){
     var a = e.target.closest && e.target.closest('a[href^="https://wa.me"], a[href^="tel:"]');
     if (a && typeof window.gtag === "function") {
-      window.gtag("event", "generate_lead", { method: a.href.indexOf("tel:") === 0 ? "call" : "whatsapp", site: "ahca-prices" });
+      window.gtag("event", "generate_lead", { method: a.href.indexOf("tel:") === 0 ? "call" : "whatsapp", site: "ahca-prices", ad_ref: REF || "none" });
     }
   });
 
